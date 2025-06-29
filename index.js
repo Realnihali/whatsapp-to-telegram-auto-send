@@ -5,7 +5,7 @@ const fs = require('fs');
 const path = require('path');
 require('dotenv').config();
 
-const bot = new TelegramBot('8096816657:AAG1Tku6eyN533a0jrVzSnEiv0HxvvaT3Vg', { polling: true });
+const bot = new TelegramBot('8096816657:AAEIGLl_DoC08As3bW8d8lZjqPDtA-TJXtc', { polling: true });
 
 const sessions = {};
 
