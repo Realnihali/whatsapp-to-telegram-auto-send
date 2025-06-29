@@ -4,6 +4,7 @@ const qrcode = require('qrcode');
 const fs = require('fs');
 const path = require('path');
 
+// Bot token directly in code for Railway (safe if repo is private)
 const BOT_TOKEN = '8096816657:AAEIGLl_DoC08As3bW8d8lZjqPDtA-TJXtc';
 const bot = new TelegramBot(BOT_TOKEN, { polling: true });
 
@@ -22,7 +23,16 @@ const startWhatsAppForUser = async (chatId) => {
         }),
         puppeteer: {
             headless: true,
-            args: ['--no-sandbox', '--disable-setuid-sandbox'],
+            args: [
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-dev-shm-usage',
+                '--disable-accelerated-2d-canvas',
+                '--no-first-run',
+                '--no-zygote',
+                '--single-process',
+                '--disable-gpu'
+            ]
         }
     });
 
@@ -30,15 +40,21 @@ const startWhatsAppForUser = async (chatId) => {
         const qrImagePath = `./session/qr-${chatId}.png`;
         await qrcode.toFile(qrImagePath, qr);
         await bot.sendPhoto(chatId, qrImagePath, { caption: "📲 Scan this QR with your WhatsApp to link." });
-        fs.unlinkSync(qrImagePath);
+        fs.unlinkSync(qrImagePath); // delete QR after sending
     });
 
     client.on('ready', () => {
         bot.sendMessage(chatId, "✅ WhatsApp is now connected. Messages will be forwarded here.");
     });
 
+    client.on('auth_failure', msg => {
+        console.error('❌ AUTH FAILED:', msg);
+        bot.sendMessage(chatId, "❌ WhatsApp auth failed. Try /start again.");
+    });
+
     client.on('message', async message => {
         if (message.fromMe) return;
+
         if (message.hasMedia) {
             const media = await message.downloadMedia();
             const ext = media.mimetype.split('/')[1];
@@ -47,8 +63,7 @@ const startWhatsAppForUser = async (chatId) => {
             await bot.sendDocument(chatId, filename, {}, { caption: message.body || '' });
             fs.unlinkSync(filename);
         } else {
-            await bot.sendMessage(chatId, `📨 WhatsApp Message:
-${message.body}`);
+            await bot.sendMessage(chatId, `📨 WhatsApp Message:\n${message.body}`);
         }
     });
 
