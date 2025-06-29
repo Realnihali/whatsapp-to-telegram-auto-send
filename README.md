@@ -84,8 +84,8 @@ whatsapp-to-telegram-auto-send/
 
 **Name**: Mohd Nihal Haneef
 **Phone**: +91 7704860008
-**Email**: [mohammadnihal816@gmail.com](mailto:mohammadnihal816@gmail.com)
-**GitHub**: [https://github.com/realnihali](https://github.com/realnihali)
+**Email**: [mohammadnihal816@gmail.com]
+**GitHub**: [https://github.com/realnihali]
 **Location**: Uttar Pradesh, India
 
 ---
