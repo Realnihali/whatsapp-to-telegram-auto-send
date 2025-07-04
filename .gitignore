@@ -1,0 +1,23 @@
+# Node modules
+node_modules/
+
+# WhatsApp session files
+session/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment-specific
+.env
+.DS_Store
+
+# IDE configs
+.vscode/
+.idea/
+
+# OS-specific
+Thumbs.db
+desktop.ini
