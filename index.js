@@ -1,5 +1,3 @@
-// index.js — Full working code for WhatsApp to Telegram Bridge
-
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const TelegramBot = require('node-telegram-bot-api');
 const qrcode = require('qrcode-terminal');
@@ -36,7 +34,7 @@ async function sendProgress(msg) {
                 '--single-process',
                 '--disable-gpu'
             ],
-            executablePath: puppeteer.executablePath()
+            executablePath: '/usr/bin/chromium'
         }
     });
 
@@ -58,15 +56,13 @@ async function sendProgress(msg) {
         if (msg.from !== aiContact && msg.body) {
             const chat = await msg.getChat();
             const sender = chat.name || chat.id.user;
-            client.sendMessage(aiContact, `From ${sender}:
-${msg.body}`);
+            client.sendMessage(aiContact, `From ${sender}:\n${msg.body}`);
         }
     });
 
     client.on('message_create', async (msg) => {
         if (msg.from === aiContact && !msg.fromMe && msg.body) {
-            bot.sendMessage(telegramChatId, `🤖 *AI Reply:*
-${msg.body}`, { parse_mode: 'Markdown' });
+            bot.sendMessage(telegramChatId, `🤖 *AI Reply:*\n${msg.body}`, { parse_mode: 'Markdown' });
         }
     });
 
