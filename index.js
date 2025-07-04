@@ -1,4 +1,4 @@
-// Full working code with puppeteer (not puppeteer-core) for Railway compatibility
+// Full working code with puppeteer (not puppeteer-core) for Railway compatibility + Telegram progress updates
 
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const TelegramBot = require('node-telegram-bot-api');
@@ -12,53 +12,83 @@ const aiContact = '34604154472@c.us';
 
 const bot = new TelegramBot(telegramBotToken);
 
-const client = new Client({
-    authStrategy: new LocalAuth({
-        dataPath: './session'
-    }),
-    puppeteer: {
-        headless: true,
-        args: [
-            '--no-sandbox',
-            '--disable-setuid-sandbox',
-            '--disable-dev-shm-usage',
-            '--disable-accelerated-2d-canvas',
-            '--no-first-run',
-            '--no-zygote',
-            '--single-process',
-            '--disable-gpu'
-        ],
-        executablePath: puppeteer.executablePath()
+async function sendProgress(msg) {
+    try {
+        await bot.sendMessage(telegramChatId, `🔄 ${msg}`);
+    } catch (e) {
+        console.error('❌ Failed to send progress update:', e.message);
     }
-});
+}
 
-client.on('qr', (qr) => {
-    qrcode.generate(qr, { small: true });
-    bot.sendMessage(telegramChatId, '📲 *Scan this QR code to log in to WhatsApp:*');
-    bot.sendPhoto(
-        telegramChatId,
-        `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(qr)}&size=300x300`
-    );
-});
+(async () => {
+    await sendProgress('🚀 Starting WhatsApp + Telegram bot initialization...');
 
-client.on('ready', () => {
-    bot.sendMessage(telegramChatId, '✅ WhatsApp successfully logged in and running!');
-});
+    const client = new Client({
+        authStrategy: new LocalAuth({
+            dataPath: './session'
+        }),
+        puppeteer: {
+            headless: true,
+            args: [
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-dev-shm-usage',
+                '--disable-accelerated-2d-canvas',
+                '--no-first-run',
+                '--no-zygote',
+                '--single-process',
+                '--disable-gpu'
+            ],
+            executablePath: puppeteer.executablePath()
+        }
+    });
 
-client.on('message', async (msg) => {
-    if (msg.from !== aiContact && msg.body) {
-        const chat = await msg.getChat();
-        const sender = chat.name || chat.id.user;
-        client.sendMessage(aiContact, `From ${sender}:
+    client.on('qr', (qr) => {
+        qrcode.generate(qr, { small: true });
+        bot.sendMessage(telegramChatId, '📲 *Scan this QR code to log in to WhatsApp:*');
+        bot.sendPhoto(
+            telegramChatId,
+            `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(qr)}&size=300x300`
+        );
+    });
+
+    client.on('ready', () => {
+        sendProgress('✅ WhatsApp successfully logged in and running!');
+    });
+
+    client.on('authenticated', () => {
+        sendProgress('🔐 WhatsApp session authenticated.');
+    });
+
+    client.on('auth_failure', (msg) => {
+        sendProgress(`❌ Authentication failed: ${msg}`);
+    });
+
+    client.on('disconnected', (reason) => {
+        sendProgress(`⚠️ WhatsApp disconnected: ${reason}`);
+    });
+
+    client.on('message', async (msg) => {
+        if (msg.from !== aiContact && msg.body) {
+            const chat = await msg.getChat();
+            const sender = chat.name || chat.id.user;
+            client.sendMessage(aiContact, `From ${sender}:
 ${msg.body}`);
-    }
-});
+        }
+    });
 
-client.on('message_create', async (msg) => {
-    if (msg.from === aiContact && !msg.fromMe && msg.body) {
-        bot.sendMessage(telegramChatId, `🤖 *AI Reply:*
+    client.on('message_create', async (msg) => {
+        if (msg.from === aiContact && !msg.fromMe && msg.body) {
+            bot.sendMessage(telegramChatId, `🤖 *AI Reply:*
 ${msg.body}`, { parse_mode: 'Markdown' });
-    }
-});
+        }
+    });
 
-client.initialize();
+    try {
+        await client.initialize();
+        await sendProgress('🟢 Client initialization complete.');
+    } catch (err) {
+        await sendProgress(`🔥 Failed to initialize client: ${err.message}`);
+        console.error('Client init error:', err);
+    }
+})();
