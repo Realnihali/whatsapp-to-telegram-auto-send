@@ -18,32 +18,28 @@ const client = new Client({
   }
 });
 
-// Send QR code to Telegram
 client.on('qr', (qr) => {
   qrcode.generate(qr, { small: true });
   bot.sendMessage(telegramChatId, '📲 *Scan this QR code to log in to WhatsApp:*');
   bot.sendPhoto(telegramChatId, `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(qr)}&size=300x300`);
 });
 
-// Confirm login
 client.on('ready', () => {
   bot.sendMessage(telegramChatId, '✅ WhatsApp successfully logged in and running!');
 });
 
-// Forward all incoming messages to AI
 client.on('message', async (msg) => {
   if (msg.from !== aiContact && msg.body) {
     const chat = await msg.getChat();
-    console.log(`📩 Forwarding to AI: ${msg.body}`);
-    client.sendMessage(aiContact, `From ${chat.name || chat.id.user}:\n${msg.body}`);
+    client.sendMessage(aiContact, `From ${chat.name || chat.id.user}:
+${msg.body}`);
   }
 });
 
-// Forward AI replies to Telegram
 client.on('message_create', async (msg) => {
   if (msg.from === aiContact && !msg.fromMe && msg.body) {
-    console.log(`🤖 AI replied: ${msg.body}`);
-    bot.sendMessage(telegramChatId, `🤖 *AI Reply:*\n${msg.body}`, { parse_mode: 'Markdown' });
+    bot.sendMessage(telegramChatId, `🤖 *AI Reply:*
+${msg.body}`, { parse_mode: 'Markdown' });
   }
 });
 
