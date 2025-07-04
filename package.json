@@ -1,17 +1,24 @@
 {
-  "name": "whatsapp-telegram-ai-forwarder",
+  "name": "whatsapp-forwarder-bot",
   "version": "1.0.0",
-  "description": "Automatically forwards WhatsApp messages to AI and returns replies to Telegram.",
+  "description": "A bot that forwards WhatsApp messages to Telegram using WhatsApp Web.js and node-telegram-bot-api",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
   },
-  "dependencies": {
-    "puppeteer": "^21.3.8",
-    "whatsapp-web.js": "^1.21.1",
-    "node-telegram-bot-api": "^0.61.0",
-    "qrcode-terminal": "^0.12.0"
-  },
+  "keywords": [
+    "whatsapp",
+    "telegram",
+    "bot",
+    "forwarder",
+    "automation"
+  ],
   "author": "Mohd Nihal Haneef",
-  "license": "ISC"
+  "license": "MIT",
+  "dependencies": {
+    "qrcode-terminal": "^0.12.0",
+    "whatsapp-web.js": "^1.23.0",
+    "node-telegram-bot-api": "^0.61.0",
+    "puppeteer": "^21.11.0"
+  }
 }
